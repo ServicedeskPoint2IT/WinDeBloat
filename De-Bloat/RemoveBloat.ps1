@@ -134,6 +134,30 @@ $locale = Get-WinSystemLocale | Select-Object -expandproperty Name
 ##Switch on locale to set variables
 ## Switch on locale to set variables
 switch ($locale) {
+    "ar-SA" {
+        $everyone = "الجميع"
+        $builtin = "مدمج"
+    }
+    "bg-BG" {
+        $everyone = "Всички"
+        $builtin = "Вграден"
+    }
+    "cs-CZ" {
+        $everyone = "Všichni"
+        $builtin = "Vestavěný"
+    }
+    "da-DK" {
+        $everyone = "Alle"
+        $builtin = "Indbygget"
+    }
+    "de-DE" {
+        $everyone = "Jeder"
+        $builtin = "Integriert"
+    }
+    "el-GR" {
+        $everyone = "Όλοι"
+        $builtin = "Ενσωματωμένο"
+    }
     "en-US" {
         $everyone = "Everyone"
         $builtin = "Builtin"
@@ -142,10 +166,121 @@ switch ($locale) {
         $everyone = "Everyone"
         $builtin = "Builtin"
     }
-
+    "es-ES" {
+        $everyone = "Todos"
+        $builtin = "Incorporado"
+    }
+    "et-EE" {
+        $everyone = "Kõik"
+        $builtin = "Sisseehitatud"
+    }
+    "fi-FI" {
+        $everyone = "Kaikki"
+        $builtin = "Sisäänrakennettu"
+    }
+    "fr-FR" {
+        $everyone = "Tout le monde"
+        $builtin = "Intégré"
+    }
+    "he-IL" {
+        $everyone = "כולם"
+        $builtin = "מובנה"
+    }
+    "hr-HR" {
+        $everyone = "Svi"
+        $builtin = "Ugrađeni"
+    }
+    "hu-HU" {
+        $everyone = "Mindenki"
+        $builtin = "Beépített"
+    }
+    "it-IT" {
+        $everyone = "Tutti"
+        $builtin = "Incorporato"
+    }
+    "ja-JP" {
+        $everyone = "すべてのユーザー"
+        $builtin = "ビルトイン"
+    }
+    "ko-KR" {
+        $everyone = "모든 사용자"
+        $builtin = "기본 제공"
+    }
+    "lt-LT" {
+        $everyone = "Visi"
+        $builtin = "Įmontuotas"
+    }
+    "lv-LV" {
+        $everyone = "Visi"
+        $builtin = "Iebūvēts"
+    }
+    "nb-NO" {
+        $everyone = "Alle"
+        $builtin = "Innebygd"
+    }
     "nl-NL" {
         $everyone = "Iedereen"
         $builtin = "Ingebouwd"
+    }
+    "pl-PL" {
+        $everyone = "Wszyscy"
+        $builtin = "Wbudowany"
+    }
+    "pt-BR" {
+        $everyone = "Todos"
+        $builtin = "Integrado"
+    }
+    "pt-PT" {
+        $everyone = "Todos"
+        $builtin = "Incorporado"
+    }
+    "ro-RO" {
+        $everyone = "Toată lumea"
+        $builtin = "Incorporat"
+    }
+    "ru-RU" {
+        $everyone = "Все пользователи"
+        $builtin = "Встроенный"
+    }
+    "sk-SK" {
+        $everyone = "Všetci"
+        $builtin = "Vstavaný"
+    }
+    "sl-SI" {
+        $everyone = "Vsi"
+        $builtin = "Vgrajen"
+    }
+    "sr-Latn-RS" {
+        $everyone = "Svi"
+        $builtin = "Ugrađeni"
+    }
+    "sv-SE" {
+        $everyone = "Alla"
+        $builtin = "Inbyggd"
+    }
+    "th-TH" {
+        $everyone = "ทุกคน"
+        $builtin = "ภายในเครื่อง"
+    }
+    "tr-TR" {
+        $everyone = "Herkes"
+        $builtin = "Yerleşik"
+    }
+    "uk-UA" {
+        $everyone = "Всі"
+        $builtin = "Вбудований"
+    }
+    "zh-CN" {
+        $everyone = "所有人"
+        $builtin = "内置"
+    }
+    "zh-TW" {
+        $everyone = "所有人"
+        $builtin = "內建"
+    }
+    default {
+        $everyone = "Everyone"
+        $builtin = "Builtin"
     }
 }
 
@@ -670,7 +805,7 @@ If ($null -ne $ProvisionedPackage)
 }
 
 ##Tweak reg permissions
-invoke-webrequest -uri "https://github.com/ServicedeskPoint2IT/WinDeBloat/blob/main/De-Bloat/SetACL.exe" -outfile "C:\Windows\Temp\SetACL.exe"
+invoke-webrequest -uri "https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/SetACL.exe" -outfile "C:\Windows\Temp\SetACL.exe"
 C:\Windows\Temp\SetACL.exe -on "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications" -ot reg -actn setowner -ownr "n:$everyone"
  C:\Windows\Temp\SetACL.exe -on "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications" -ot reg -actn ace -ace "n:$everyone;p:full"
 
@@ -1091,7 +1226,7 @@ $A = Start-Process -FilePath "C:\Program Files\HP\Documentation\Doc_uninstall.cm
 
 ##Remove HP Connect Optimizer if setup.exe exists
 if (test-path -Path 'C:\Program Files (x86)\InstallShield Installation Information\{6468C4A5-E47E-405F-B675-A70A70983EA6}\setup.exe') {
-invoke-webrequest -uri "https://github.com/ServicedeskPoint2IT/WinDeBloat/blob/main/De-Bloat/HPConnOpt.iss" -outfile "C:\Windows\Temp\HPConnOpt.iss"
+invoke-webrequest -uri "https://raw.githubusercontent.com/ServicedeskPoint2IT/WinDeBloat/main/De-Bloat/HPConnOpt.iss" -outfile "C:\Windows\Temp\HPConnOpt.iss"
 
 &'C:\Program Files (x86)\InstallShield Installation Information\{6468C4A5-E47E-405F-B675-A70A70983EA6}\setup.exe' @('-s', '-f1C:\Windows\Temp\HPConnOpt.iss')
 }
@@ -1592,7 +1727,7 @@ if ($mcafeeinstalled -eq "true") {
 ### Download McAfee Consumer Product Removal Tool ###
 write-host "Downloading McAfee Removal Tool"
 # Download Source
-$URL = 'https://github.com/ServicedeskPoint2IT/WinDeBloat/blob/main/De-Bloat/mcafeeclean.zip'
+$URL = 'https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/mcafeeclean.zip'
 
 # Set Save Directory
 $destination = 'C:\ProgramData\Debloat\mcafee.zip'
@@ -1611,7 +1746,7 @@ write-host "McAfee Removal Tool has been run"
 ### Download McAfee Consumer Product Removal Tool ###
 write-host "Downloading McAfee Removal Tool"
 # Download Source
-$URL = 'https://github.com/ServicedeskPoint2IT/WinDeBloat/blob/main/De-Bloat/mccleanup.zip'
+$URL = 'https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/mcafeeclean.zip'
 
 # Set Save Directory
 $destination = 'C:\ProgramData\Debloat\mcafeenew.zip'
