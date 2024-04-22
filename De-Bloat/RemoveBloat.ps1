@@ -17,7 +17,7 @@
 .OUTPUTS
 C:\ProgramData\Debloat\Debloat.log
 .NOTES
-  Version:        4.2.17
+  Version:        4.2.19
   Author:         Andrew Taylor
   Twitter:        @AndrewTaylor_2
   WWW:            andrewstaylor.com
@@ -85,6 +85,7 @@ C:\ProgramData\Debloat\Debloat.log
   Change 10/04/2024 - Office uninstall string fix
   Change 11/04/2024 - Added Office support for multi-language
   Change 17/04/2024 - HP Apps update
+  Change 19/04/2024 - HP Fix
 N/A
 #>
 
@@ -805,7 +806,7 @@ If ($null -ne $ProvisionedPackage)
 }
 
 ##Tweak reg permissions
-invoke-webrequest -uri "https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/SetACL.exe" -outfile "C:\Windows\Temp\SetACL.exe"
+invoke-webrequest -uri "https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/SetACL.exe" -outfile "C:\Windows\Temp\SetACL.exe"
 C:\Windows\Temp\SetACL.exe -on "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications" -ot reg -actn setowner -ownr "n:$everyone"
  C:\Windows\Temp\SetACL.exe -on "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications" -ot reg -actn ace -ace "n:$everyone;p:full"
 
@@ -825,7 +826,6 @@ If (!(Test-Path $registryPath)) {
 }
 Set-ItemProperty $registryPath "ChatIcon" -Value 2
 write-host "Removed Teams Chat"
-
 ############################################################################################################
 #                                           Windows Backup App                                             #
 #                                                                                                          #
@@ -1226,7 +1226,7 @@ $UninstallPrograms = @(
     "AD2F1837.HPPowerManager"
     "AD2F1837.HPPrivacySettings"
     "AD2F1837.HPQuickDrop"
-    #"AD2F1837.HPSupportAssistant"
+    "AD2F1837.HPSupportAssistant"
     "AD2F1837.HPSystemInformation"
     "AD2F1837.myHP"
     "RealtekSemiconductorCorp.HPAudioControl",
@@ -1254,9 +1254,9 @@ $UninstallPrograms = @(
 
 $HPidentifier = "AD2F1837"
 
-$InstalledPackages = Get-AppxPackage -AllUsers | Where-Object {(($UninstallPackages -contains $_.Name) -or ($_.Name -match "^$HPidentifier"))-and ($_.Name -NotMatch $WhitelistedApps)}
+$InstalledPackages = Get-AppxPackage -AllUsers | Where-Object {(($UninstallPrograms -contains $_.Name) -or ($_.Name -like "^$HPidentifier"))-and ($_.Name -notlike $WhitelistedApps)}
 
-$ProvisionedPackages = Get-AppxProvisionedPackage -Online | Where-Object {(($UninstallPackages -contains $_.Name) -or ($_.Name -match "^$HPidentifier"))-and ($_.Name -NotMatch $WhitelistedApps)}
+$ProvisionedPackages = Get-AppxProvisionedPackage -Online | Where-Object {(($UninstallPrograms -contains $_.DisplayName) -or ($_.DisplayName -like "*$HPidentifier"))-and ($_.DisplayName -notlike $WhitelistedApps)}
 
 $InstalledPrograms = $allstring | Where-Object {$UninstallPrograms -contains $_.Name}
 
@@ -1324,7 +1324,7 @@ $A = Start-Process -FilePath "C:\Program Files\HP\Documentation\Doc_uninstall.cm
 
 ##Remove HP Connect Optimizer if setup.exe exists
 if (test-path -Path 'C:\Program Files (x86)\InstallShield Installation Information\{6468C4A5-E47E-405F-B675-A70A70983EA6}\setup.exe') {
-invoke-webrequest -uri "https://raw.githubusercontent.com/ServicedeskPoint2IT/WinDeBloat/main/De-Bloat/HPConnOpt.iss" -outfile "C:\Windows\Temp\HPConnOpt.iss"
+invoke-webrequest -uri "https://raw.githubusercontent.com/andrew-s-taylor/public/main/De-Bloat/HPConnOpt.iss" -outfile "C:\Windows\Temp\HPConnOpt.iss"
 
 &'C:\Program Files (x86)\InstallShield Installation Information\{6468C4A5-E47E-405F-B675-A70A70983EA6}\setup.exe' @('-s', '-f1C:\Windows\Temp\HPConnOpt.iss')
 }
@@ -1825,7 +1825,7 @@ if ($mcafeeinstalled -eq "true") {
 ### Download McAfee Consumer Product Removal Tool ###
 write-host "Downloading McAfee Removal Tool"
 # Download Source
-$URL = 'https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/mcafeeclean.zip'
+$URL = 'https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/mcafeeclean.zip'
 
 # Set Save Directory
 $destination = 'C:\ProgramData\Debloat\mcafee.zip'
@@ -1844,7 +1844,7 @@ write-host "McAfee Removal Tool has been run"
 ### Download McAfee Consumer Product Removal Tool ###
 write-host "Downloading McAfee Removal Tool"
 # Download Source
-$URL = 'https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/mcafeeclean.zip'
+$URL = 'https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/mccleanup.zip'
 
 # Set Save Directory
 $destination = 'C:\ProgramData\Debloat\mcafeenew.zip'
@@ -2029,8 +2029,8 @@ Stop-Transcript
 # SIG # Begin signature block
 # MIIoGQYJKoZIhvcNAQcCoIIoCjCCKAYCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCBJ/Uzmw5xZFavB
-# /emy46AdwhqfHad9hEUqr6PlACLJp6CCIRwwggWNMIIEdaADAgECAhAOmxiO+dAt
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCB1RKh0kRYNAn1g
+# 6bAY81NNEPCwJSUM2RjOjBZ+qtc4waCCIRwwggWNMIIEdaADAgECAhAOmxiO+dAt
 # 5+/bUOIIQBhaMA0GCSqGSIb3DQEBDAUAMGUxCzAJBgNVBAYTAlVTMRUwEwYDVQQK
 # EwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xJDAiBgNV
 # BAMTG0RpZ2lDZXJ0IEFzc3VyZWQgSUQgUm9vdCBDQTAeFw0yMjA4MDEwMDAwMDBa
@@ -2212,33 +2212,33 @@ Stop-Transcript
 # aWduaW5nIFJTQTQwOTYgU0hBMzg0IDIwMjEgQ0ExAhAIsZ/Ns9rzsDFVWAgBLwDp
 # MA0GCWCGSAFlAwQCAQUAoIGEMBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJ
 # KoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQB
-# gjcCARUwLwYJKoZIhvcNAQkEMSIEIAwuUucjgwuN/A0DWperfC32eB7+ctef8iP3
-# 4d5paTZQMA0GCSqGSIb3DQEBAQUABIICACjj/J3KV2Dc0mB0L+ZF9JRwajyL+mLz
-# FZMlFyJPMSXOcX5VX69nQAq0UxnyFbYD7XFpe8cSlSKAJdpc/0JK2RHlXMqXURq2
-# D1B9JxpZvoGzp2Bft6VPweO1xSb4LyCuYt5OngN0MNU9X4gymKyrg6g7jgHwru/m
-# tXmQq2fx7QRcCMwAZiqLf9zEZSdNcaq4d1zVmpTz0cRRibEMcSFnXCGes3cwrhaC
-# 1a+XWlw2NDi7Wu155h9FIJzZXUNZNap0DM4o4qwkBPkQJX0ePA6UYP7klDNsWi1q
-# E8lHHTth9nwpDcy482I8+O5Ej+GdGvje7L0d0SiW+RPQ7AODNus/kOpFAF029SY4
-# k/xanv02cd4Mo/MNKsKM41bTm8qMbLD8R1p2niplacLHALqP4OfciHjqcyBPBOw9
-# /rn/O2/KfsNh2gkXcVeBFP8pnupNm6vj3JGiioI0bxOAbKBOQA06xIumqsjQcy5E
-# fMxaz69cmNHNOCKhgr5ntjJGg8VQPIueelHqlzsiR1hXVHjIci5QqabRghG7OEN4
-# N4cRqMYMvmRzR7khRTg1XIzWOqZGmMbRTnU2kJlOfPqqQMkHEvolcNVrr4saP318
-# WerT8RTGILHEKke06VEoA6vo+b0dUhuUIFV6X1h4mOzI9GU78vLgHR3QFEFUBhMN
-# Fnum2OqhJlbhoYIDIDCCAxwGCSqGSIb3DQEJBjGCAw0wggMJAgEBMHcwYzELMAkG
+# gjcCARUwLwYJKoZIhvcNAQkEMSIEIJjqzDr35w3/BZ5ieCPi9d4iFtwP907oGtvA
+# 1qgQzHjdMA0GCSqGSIb3DQEBAQUABIICAGn620Yyfy++e34E5upFx1qkqQlteofs
+# M7Q9Aqk5NfxiD6w75nGL4fBEWUQKqXWBIuxIFrJGazqd6lnGDV2KcV3e2u2+cWic
+# muRzKTfrLZEaW2FJmXwafpIYQROnGQ4koqFDvMBML5cxLbArmjAFQCMauPxMXUhE
+# +f0dwouwYQ6btnq6QGQm0uYVUpEVj7AFBjZSdYkX2/uO6bkllHlS+eGsKjBY7X5S
+# UHZ7dmsif4GHzr+O0XsGwKOB0PR/f5txgvBTGvHjp233Nm0+zWE7zZdNetQstEbx
+# 4VMAsBWK8PLeVRXZ0P5CQuK3lIrSvhmItJFdzFiBR3ESQcVs9COGU8LGHk22o0Q7
+# m0O1RdXMWVwkB7+xqjS+rHtVfTUEm152PTOpC8vEmRydACBwxyiSGZHAEwU657RE
+# Amy9mPgxOlZsCENVKOGdhjKy+8+nTim3Ohg//5AhEfcpQiRJboauyDgyBPRFD/Zv
+# tEovgqy9An5UjIRKbF03YI8lI7Yv1NSkbZLJdg0IDeA7fHIfPEpDNdHzXZiKGRn0
+# gfiFTM2G3i+QRVmFT1hezVd+q+eygqbAl48GEuOOziivdgps9jzV9fxmyH+Ybvn1
+# 0MUZe8PNt6MEHRJY8AsoW9UZ4whlfKBWN2gfMFtBwLkTqdm/SNBE3DGJB1yw0rE1
+# WO+ehnHwPA1yoYIDIDCCAxwGCSqGSIb3DQEJBjGCAw0wggMJAgEBMHcwYzELMAkG
 # A1UEBhMCVVMxFzAVBgNVBAoTDkRpZ2lDZXJ0LCBJbmMuMTswOQYDVQQDEzJEaWdp
 # Q2VydCBUcnVzdGVkIEc0IFJTQTQwOTYgU0hBMjU2IFRpbWVTdGFtcGluZyBDQQIQ
 # BUSv85SdCDmmv9s/X+VhFjANBglghkgBZQMEAgEFAKBpMBgGCSqGSIb3DQEJAzEL
-# BgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTI0MDQxNzA5NDM1NlowLwYJKoZI
-# hvcNAQkEMSIEIP9nIYlry6pq3X/Oy6tnFeTxnbO1WDh9Y2Jm72p/E6DPMA0GCSqG
-# SIb3DQEBAQUABIICADqZgqdH8YXLTPldi0H/c5rnCW0wTXGx0tNPFdUMU30mBfxE
-# 0wKVT75lRPczhfMbO450kmzNxphxgH+7QdmylX3K9XaMWCpLWdPRURJxqDl1NOo+
-# J/xKvZHNwugBgMuqCWldmV9nKtRRKyaF0fk0h0Q5z0EJQ80XelB/JFXL3xribst7
-# Hf6e6cUsAtXHQCAK4wCXTvvtVoFtnEHq8cRuRo7iOQ0JoYlxd5QGgkqRgGB0ocjW
-# pB5B0/kvuT+mXH5StE6/CxBY9a11DV/XUdrru4E6GJDE8HIShWMLj6BsRZJ94b+f
-# 3WbFbhBzSA0JJcc1yG7h51JD/vwO25yrfwN/IrUCd05nYYKx6lTh6UCan+IlH6gd
-# +21LxIay+KPhCwBWoyxwXG4tuPHlSsTtf8vaCMoS3qJf/1bqmRe5M6Nn0OVZb4rO
-# VMgs1WP5qmxzYOAKAAeWNT+C3jy4uXy6E8FQ1vbCaiRE8huIHua3B/bURdTFpNW6
-# Hw0S33o2R80QD12JvTGXoYblQSit2zKZ+wU3Ea5c4jQAgujn+Nahh0BwB0HZSQXY
-# R6XJBwHw4K0TgwDKpq+UJX0ZhIh7qVq6tkbaZtn1L3F6Xad/tmrAH3IyWru1oDwM
-# YH6U4WQJoo/JaHMDnYy0thM6OsE7J7W/DSrQnEx8aaKLYpjiEls5MPgEc9ik
+# BgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTI0MDQyMTEwMjcyNlowLwYJKoZI
+# hvcNAQkEMSIEIE5HXATH2c3vTd5BmN0JMqjrK7rlgx985Q0vMMju0E+FMA0GCSqG
+# SIb3DQEBAQUABIICACjM2T2vSpcGFwPAsBRHMSOSEAto+X5R7Q01yRh9W5GqnQFs
+# VAlR7zWQyTciB1nZG67bZjzlXxBw5pd0SZcuESULsVMcmMsmlFFimzcSRXwOIOrI
+# /LjSYW13I4PdpGjgwswpSqTh2LsahzHLObq2RCldsgIuUaMGLR7zgFS96eFSlAKB
+# LexMWvtJ4F7OEy/4oMTJtenUpHVs1kSdc+mkHxC1/AcfoJo5HaCkFwFUBkDqcZnl
+# uw22dyMYQ4mnRdUSYX7RJOM03RKIyM8Mmsws+6wrFipg1to5WQMiC5cxSKZcps2T
+# TREZYUG6Z7km+wUG0tdRnuwmDwwhViAZr6B5yKklMVxPeCnEfOMg0kj7+6v/7p/G
+# /FhrXbBRLw7/9I/HJ6PR1q2ohmYI0ZBT2kHaHwn7jbGFt+T4V7vtpp0ElPZ4DmPO
+# r+NRFyeL+WBmsUcpwt3gUS9zupfDhMN+vjT3z9H9dS1CO26spjs0lXSluhf7+gRU
+# 3HGOv9wcRICm4B88z7rK/ae7ShYO0DVuE9S1PG0ijN1QzRrQOV0s9DcXHPLG08Zq
+# dgskCuJv2YI+Kno81Ey52pBRv71FR/BXKadn/1yreEbhsjxu28gz0REpCgbiwMjb
+# LrjuwWZisQ4/jMTP6Lff7dr9x12kNIumZ6nCx5zthabuk11srv0eXYQd5Bpz
 # SIG # End signature block
