@@ -899,18 +899,6 @@ if ($version -like "*Windows 11*") {
     Remove-Item "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\LayoutModification.xml"
     
     }
-
-    {
-    
-    Remove-Item "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Miro Offer.lnk"
-    
-    }
-
-    {
-    
-    Remove-Item "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Aanbiedingen.lnk"
-    
-    }
     
 $blankjson = @'
 { 
