@@ -136,6 +136,10 @@ $locale = Get-WinSystemLocale | Select-Object -expandproperty Name
 ##Switch on locale to set variables
 ## Switch on locale to set variables
 switch ($locale) {
+    "ar-SA" {
+        $everyone = "الجميع"
+        $builtin = "مدمج"
+    }
     "bg-BG" {
         $everyone = "Всички"
         $builtin = "Вграден"
