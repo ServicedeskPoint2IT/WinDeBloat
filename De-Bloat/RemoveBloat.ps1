@@ -316,6 +316,7 @@ switch ($locale) {
 ##Remove bloat
 $Bloatware = @(
     #Unnecessary Windows 10/11 AppX Apps
+    "Microsoft.BingWeather"
     "Microsoft.549981C3F5F10"
     "Microsoft.BingNews"
     "Microsoft.GetHelp"
@@ -359,6 +360,7 @@ $Bloatware = @(
     "Microsoft.PowerAutomateDesktop"
     "SpotifyAB.SpotifyMusic"
     "Microsoft.MicrosoftJournal"
+    "Clipchamp.Clipchamp"
     "Disney.37853FC22B2CE"
     "*EclipseManager*"
     "*ActiproSoftwareLLC*"
@@ -895,6 +897,18 @@ if ($version -like "*Windows 11*") {
     {
     
     Remove-Item "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\LayoutModification.xml"
+    
+    }
+
+    {
+    
+    Remove-Item "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Miro Offer.lnk"
+    
+    }
+
+    {
+    
+    Remove-Item "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Aanbiedingen.lnk"
     
     }
     
