@@ -87,6 +87,7 @@ C:\ProgramData\Debloat\Debloat.log
   Change 17/04/2024 - HP Apps update
   Change 19/04/2024 - HP Fix
   Change 24/04/2024 - Switched provisionedpackage and appxpackage arround
+  Change 20/06/2024 - Removed removal of Cortana and Bing Search, changed URI's from source's Git to this one
 N/A
 #>
 
@@ -483,32 +484,32 @@ $UserSIDs = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Pr
     }
             
     #Stops Cortana from being used as part of your Windows Search Function
-    Write-Host "Stopping Cortana from being used as part of your Windows Search Function"
-    $Search = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
-    If (!(Test-Path $Search)) {
-        New-Item $Search
-    }
-    If (Test-Path $Search) {
-        Set-ItemProperty $Search AllowCortana -Value 0 
-    }
+    #Write-Host "Stopping Cortana from being used as part of your Windows Search Function"
+    #$Search = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+    #If (!(Test-Path $Search)) {
+    #    New-Item $Search
+    #}
+    #If (Test-Path $Search) {
+    #    Set-ItemProperty $Search AllowCortana -Value 0 
+    #}
 
     #Disables Web Search in Start Menu
-    Write-Host "Disabling Bing Search in Start Menu"
-    $WebSearch = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
-    If (!(Test-Path $WebSearch)) {
-        New-Item $WebSearch
-    }
-    Set-ItemProperty $WebSearch DisableWebSearch -Value 1 
+    #Write-Host "Disabling Bing Search in Start Menu"
+    #$WebSearch = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+    #If (!(Test-Path $WebSearch)) {
+    #    New-Item $WebSearch
+    #}
+    #Set-ItemProperty $WebSearch DisableWebSearch -Value 1 
     ##Loop through all user SIDs in the registry and disable Bing Search
-    foreach ($sid in $UserSIDs) {
-        $WebSearch = "Registry::HKU\$sid\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
-        If (!(Test-Path $WebSearch)) {
-            New-Item $WebSearch
-        }
-        Set-ItemProperty $WebSearch BingSearchEnabled -Value 0
-    }
+    #foreach ($sid in $UserSIDs) {
+    #    $WebSearch = "Registry::HKU\$sid\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
+    #    If (!(Test-Path $WebSearch)) {
+    #        New-Item $WebSearch
+    #    }
+    #    Set-ItemProperty $WebSearch BingSearchEnabled -Value 0
+    #}
     
-    Set-ItemProperty "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" BingSearchEnabled -Value 0 
+    #Set-ItemProperty "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" BingSearchEnabled -Value 0 
 
             
     #Stops the Windows Feedback Experience from sending anonymous data
@@ -812,7 +813,7 @@ If ($null -ne $ProvisionedPackage)
 }
 
 ##Tweak reg permissions
-invoke-webrequest -uri "https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/SetACL.exe" -outfile "C:\Windows\Temp\SetACL.exe"
+invoke-webrequest -uri "https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/SetACL.exe" -outfile "C:\Windows\Temp\SetACL.exe"
 C:\Windows\Temp\SetACL.exe -on "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications" -ot reg -actn setowner -ownr "n:$everyone"
  C:\Windows\Temp\SetACL.exe -on "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications" -ot reg -actn ace -ace "n:$everyone;p:full"
 
@@ -1741,7 +1742,7 @@ if ($mcafeeinstalled -eq "true") {
 ### Download McAfee Consumer Product Removal Tool ###
 write-host "Downloading McAfee Removal Tool"
 # Download Source
-$URL = 'https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/mcafeeclean.zip'
+$URL = 'https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/mcafeeclean.zip'
 
 # Set Save Directory
 $destination = 'C:\ProgramData\Debloat\mcafee.zip'
@@ -1760,7 +1761,7 @@ write-host "McAfee Removal Tool has been run"
 ### Download McAfee Consumer Product Removal Tool ###
 write-host "Downloading McAfee Removal Tool"
 # Download Source
-$URL = 'https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/mccleanup.zip'
+$URL = 'https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/mccleanup.zip'
 
 # Set Save Directory
 $destination = 'C:\ProgramData\Debloat\mcafeenew.zip'
