@@ -17,7 +17,7 @@
 .OUTPUTS
 C:\ProgramData\Debloat\Debloat.log
 .NOTES
-  Version:        5.0.5
+  Version:        5.0.17
   Author:         Andrew Taylor
   Twitter:        @AndrewTaylor_2
   WWW:            andrewstaylor.com
@@ -99,6 +99,15 @@ C:\ProgramData\Debloat\Debloat.log
   Change 06/06/2024 - Added keys to block Windows Recall
   Change 07/06/2024 - New fixes for HP and McAfee (thanks to Keith Hay)
   Change 24/06/2024 - Added Microsoft.SecHealthUI to whitelist
+  Change 26/06/2024 - Fix when run outside of ESP
+  Change 04/07/2024 - Dell fix for "|"
+  Change 08/07/2024 - Made whitelist more standard across platforms and removed bloat list to use only whitelisting
+  Change 08/07/2024 - Added start.bin
+  Change 12/07/2024 - Added logic around start.bin
+  Change 15/07/2024 - Removed Lenovo bookmarks
+  Change 18/07/2024 - Updated detection for removing Office Home
+  Change 23/07/2024 - Lenovo camera fix for E14
+  Change 25/07/2024 - Added MS Teams to whitelist
 N/A
 #>
 
@@ -327,7 +336,19 @@ switch ($locale) {
         'WindSynthBerry',
         'MIDIBerry',
         'Slack',
-        'Microsoft.SecHealthUI'
+        'Microsoft.SecHealthUI',
+        "WavesAudio.MaxxAudioProforDell2019"
+        "Dell - Extension*"
+        "Dell, Inc. - Firmware*"
+        "Dell Optimizer Core"
+        "Dell SupportAssist Remediation"
+        "Dell SupportAssist OS Recovery Plugin for Dell Update"
+        "Dell Pair"
+        "Dell Display Manager 2.0"
+        "Dell Display Manager 2.1"
+        "Dell Display Manager 2.2"
+        "Dell Peripheral Manager"
+        "MSTeams"
     )
     ##If $customwhitelist is set, split on the comma and add to whitelist
     if ($customwhitelist) {
@@ -376,7 +397,37 @@ switch ($locale) {
         'Microsoft.VCLibs.140.00',
         'Microsoft.Services.Store.Engagement',
         'Microsoft.UI.Xaml.2.0',
-        '*Nvidia*'
+        '*Nvidia*',
+        "Microsoft.AsyncTextService",
+        "Microsoft.UI.Xaml.CBS",
+        "Microsoft.Windows.CallingShellApp",
+        "Microsoft.Windows.OOBENetworkConnectionFlow",
+        "Microsoft.Windows.PrintQueueActionCenter",
+        "Microsoft.Windows.StartMenuExperienceHost",
+        "MicrosoftWindows.Client.CBS",
+        "MicrosoftWindows.Client.Core",
+        "MicrosoftWindows.UndockedDevKit",
+        "NcsiUwpApp",
+        "Microsoft.NET.Native.Runtime.2.2",
+        "Microsoft.NET.Native.Framework.2.2",
+        "Microsoft.UI.Xaml.2.8",
+        "Microsoft.UI.Xaml.2.7",
+        "Microsoft.UI.Xaml.2.3",
+        "Microsoft.UI.Xaml.2.4",
+        "Microsoft.UI.Xaml.2.1",
+        "Microsoft.UI.Xaml.2.2",
+        "Microsoft.UI.Xaml.2.5",
+        "Microsoft.UI.Xaml.2.6",
+        "Microsoft.VCLibs.140.00.UWPDesktop",
+        "MicrosoftWindows.Client.LKG",
+        "MicrosoftWindows.Client.FileExp",
+        "Microsoft.WindowsAppRuntime.1.5",
+        "Microsoft.WindowsAppRuntime.1.3",
+        "Microsoft.WindowsAppRuntime.1.1",
+        "Microsoft.WindowsAppRuntime.1.2",
+        "Microsoft.WindowsAppRuntime.1.4",
+        "Microsoft.Windows.OOBENetworkCaptivePortal",
+        "Microsoft.Windows.Search"
     )
 
     ##Combine the two arrays
@@ -389,12 +440,13 @@ switch ($locale) {
         $displayname = $appxprov.DisplayName
         write-host "Removing $displayname AppX Provisioning Package"
         try {
-            Remove-AppxProvisionedPackage -PackageName $packagename -Online
+            Remove-AppxProvisionedPackage -PackageName $packagename -Online -ErrorAction SilentlyContinue
+            write-host "Removed $displayname AppX Provisioning Package"
         }
         catch {
-            
+            write-host "Unable to remove $displayname AppX Provisioning Package"
         }
-        write-host "Removed $displayname AppX Provisioning Package"
+        
     }
 
 
@@ -402,136 +454,21 @@ switch ($locale) {
     foreach ($appxapp in $appxinstalled) {
         $packagename = $appxapp.PackageFullName
         $displayname = $appxapp.Name
-        ##Check if exists first
-        if (Get-AppxPackage -Name $packagename -ErrorAction SilentlyContinue) {
             write-host "$displayname AppX Package exists"
             write-host "Removing $displayname AppX Package"
             try {
-                Remove-AppxPackage -Package $packagename -AllUsers
+                Remove-AppxPackage -Package $packagename -AllUsers -ErrorAction SilentlyContinue
+                write-host "Removed $displayname AppX Package"
             }
             catch {
-                
+                write-host "$displayname AppX Package does not exist"
             }
-            write-host "Removed $displayname AppX Package"
-        } else {
-            write-host "$displayname AppX Package does not exist"
-            # Skip the removal process
-        }
+            
+
 
     }
     
 
-
-##Remove bloat
-$Bloatware = @(
-    #Unnecessary Windows 10/11 AppX Apps
-    "Microsoft.549981C3F5F10"
-    "Microsoft.BingNews"
-    "Microsoft.GetHelp"
-    "Microsoft.Getstarted"
-    "Microsoft.Messaging"
-    "Microsoft.Microsoft3DViewer"
-    "Microsoft.MicrosoftOfficeHub"
-    "Microsoft.MicrosoftSolitaireCollection"
-    "Microsoft.NetworkSpeedTest"
-    "Microsoft.MixedReality.Portal"
-    "Microsoft.News"
-    "Microsoft.Office.Lens"
-    "Microsoft.Office.OneNote"
-    "Microsoft.Office.Sway"
-    "Microsoft.OneConnect"
-    "Microsoft.People"
-    "Microsoft.Print3D"
-    "Microsoft.RemoteDesktop"
-    "Microsoft.SkypeApp"
-    "Microsoft.StorePurchaseApp"
-    "Microsoft.Office.Todo.List"
-    "Microsoft.Whiteboard"
-    "Microsoft.WindowsAlarms"
-    #"Microsoft.WindowsCamera"
-    "microsoft.windowscommunicationsapps"
-    "Microsoft.WindowsFeedbackHub"
-    "Microsoft.WindowsMaps"
-    "Microsoft.WindowsSoundRecorder"
-    "Microsoft.Xbox.TCUI"
-    "Microsoft.XboxApp"
-    "Microsoft.XboxGameOverlay"
-    "Microsoft.XboxIdentityProvider"
-    "Microsoft.XboxSpeechToTextOverlay"
-    "Microsoft.ZuneMusic"
-    "Microsoft.ZuneVideo"
-    "MicrosoftTeams"
-    "Microsoft.YourPhone"
-    "Microsoft.XboxGamingOverlay_5.721.10202.0_neutral_~_8wekyb3d8bbwe"
-    "Microsoft.GamingApp"
-    "Microsoft.Todos"
-    "Microsoft.PowerAutomateDesktop"
-    "SpotifyAB.SpotifyMusic"
-    "Microsoft.MicrosoftJournal"
-    "Disney.37853FC22B2CE"
-    "*EclipseManager*"
-    "*ActiproSoftwareLLC*"
-    "*AdobeSystemsIncorporated.AdobePhotoshopExpress*"
-    "*Duolingo-LearnLanguagesforFree*"
-    "*PandoraMediaInc*"
-    "*CandyCrush*"
-    "*BubbleWitch3Saga*"
-    "*Wunderlist*"
-    "*Flipboard*"
-    "*Twitter*"
-    "*Facebook*"
-    "*Spotify*"
-    "*Minecraft*"
-    "*Royal Revolt*"
-    "*Sway*"
-    "*Speed Test*"
-    "*Dolby*"
-    "*Office*"
-    "*Disney*"
-    "clipchamp.clipchamp"
-    "*gaming*"
-    "MicrosoftCorporationII.MicrosoftFamily"
-    "C27EB4BA.DropboxOEM*"
-    "*DevHome*"
-    "MicrosoftCorporationII.QuickAssist"
-    #Optional: Typically not removed but you can if you need to for some reason
-    #"*Microsoft.Advertising.Xaml_10.1712.5.0_x64__8wekyb3d8bbwe*"
-    #"*Microsoft.Advertising.Xaml_10.1712.5.0_x86__8wekyb3d8bbwe*"
-    #"*Microsoft.BingWeather*"
-    #"*Microsoft.MSPaint*"
-    #"*Microsoft.MicrosoftStickyNotes*"
-    #"*Microsoft.Windows.Photos*"
-    #"*Microsoft.WindowsCalculator*"
-    #"*Microsoft.WindowsStore*"
-)
-##If custom whitelist specified, remove from array
-if ($customwhitelist) {
-    $customWhitelistApps = $customwhitelist -split ","
-    $Bloatware = $Bloatware | Where-Object { $customWhitelistApps -notcontains $_ }
-}
-    
-
-    foreach ($Bloat in $Bloatware) {
-        
-        if (Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $Bloat -ErrorAction SilentlyContinue) {
-            Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $Bloat | Remove-AppxProvisionedPackage -Online
-            Write-Host "Removed provisioned package for $Bloat."
-        } else {
-            Write-Host "Provisioned package for $Bloat not found."
-        }
-
-        if (Get-AppxPackage -Name $Bloat -ErrorAction SilentlyContinue) {
-            Get-AppxPackage -allusers -Name $Bloat | Remove-AppxPackage -AllUsers
-            Write-Host "Removed $Bloat."
-        } else {
-            Write-Host "$Bloat not found."
-        }
-
-
-
-        
-
-    }
 ############################################################################################################
 #                                        Remove Registry Keys                                              #
 #                                                                                                          #
@@ -832,7 +769,7 @@ else {
 }
 
 ##Kill Cortana again
-Get-AppxPackage - allusers Microsoft.549981C3F5F10 | Remove AppxPackage
+Get-AppxPackage Microsoft.549981C3F5F10 -allusers | Remove-AppxPackage
 ############################################################################################################
 #                                        Remove Learn about this picture                                   #
 #                                                                                                          #
@@ -902,29 +839,6 @@ Get-AppxPackage - allusers Microsoft.549981C3F5F10 | Remove AppxPackage
 ############################################################################################################
     #Windows 11 Customisations
     write-host "Removing Windows 11 Customisations"
-    #Remove XBox Game Bar
-    
-    $packages = @(
-        "Microsoft.XboxGamingOverlay",
-        "Microsoft.XboxGameCallableUI",
-        "Microsoft.549981C3F5F10",
-        "*getstarted*",
-        "Microsoft.Windows.ParentalControls"
-    )
-    ##If custom whitelist specified, remove from array
-if ($customwhitelist) {
-    $customWhitelistApps = $customwhitelist -split ","
-    $packages = $packages | Where-Object { $customWhitelistApps -notcontains $_ }
-}
-    
-
-    foreach ($package in $packages) {
-        $appPackage = Get-AppxPackage -allusers $package -ErrorAction SilentlyContinue
-        if ($appPackage) {
-            Remove-AppxPackage -Package $appPackage.PackageFullName -AllUsers
-            Write-Host "Removed $package"
-        }
-    }
 
    #Remove Teams Chat
 $MSTeams = "MicrosoftTeams"
@@ -1178,6 +1092,24 @@ $blankjson = @'
 '@
 
 $blankjson | Out-File "C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\LayoutModification.xml" -Encoding utf8 -Force
+$intunepath = "HKLM:\SOFTWARE\Microsoft\IntuneManagementExtension\Win32Apps"
+$intunecomplete = @(Get-ChildItem $intunepath).count
+$userpath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList"
+$userprofiles = Get-ChildItem $userpath | ForEach-Object { Get-ItemProperty $_.PSPath }
+
+$nonAdminLoggedOn = $false
+foreach ($user in $userprofiles) {
+    if ($user.PSChildName -ne '.DEFAULT' -and $user.PSChildName -ne 'S-1-5-18' -and $user.PSChildName -ne 'S-1-5-19' -and $user.PSChildName -ne 'S-1-5-20' -and $user.PSChildName -notmatch 'S-1-5-21-\d+-\d+-\d+-500') {
+        $nonAdminLoggedOn = $true
+        break
+    }
+}
+
+if ($nonAdminLoggedOn -eq $false) {
+MkDir -Path "C:\Users\Default\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState" -Force -ErrorAction SilentlyContinue | Out-Null
+$starturl = "https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/start2.bin"
+invoke-webrequest -uri $starturl -outfile "C:\Users\Default\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState\Start2.bin"
+}
 }
 
 
@@ -1454,12 +1386,9 @@ $UninstallPrograms = @(
 
 )
 
-##Add HP whitelist
-    $WhitelistedApps += @(
-)
 
 
-$UninstallPrograms = $UninstallPrograms | Where-Object{$WhitelistedApps -notcontains $_}
+$UninstallPrograms = $UninstallPrograms | Where-Object{$appstoignore -notcontains $_}
 
 $HPidentifier = "AD2F1837"
 
@@ -1506,7 +1435,7 @@ $A = Start-Process -FilePath "C:\Program Files\HP\Documentation\Doc_uninstall.cm
 
 ##Remove HP Connect Optimizer if setup.exe exists
 if (test-path -Path 'C:\Program Files (x86)\InstallShield Installation Information\{6468C4A5-E47E-405F-B675-A70A70983EA6}\setup.exe') {
-invoke-webrequest -uri "https://raw.githubusercontent.com/ServicedeskPoint2IT/WinDeBloat/main/De-Bloat/HPConnOpt.iss" -outfile "C:\Windows\Temp\HPConnOpt.iss"
+invoke-webrequest -uri "https://raw.githubusercontent.com/andrew-s-taylor/public/main/De-Bloat/HPConnOpt.iss" -outfile "C:\Windows\Temp\HPConnOpt.iss"
 
 &'C:\Program Files (x86)\InstallShield Installation Information\{6468C4A5-E47E-405F-B675-A70A70983EA6}\setup.exe' @('-s', '-f1C:\Windows\Temp\HPConnOpt.iss')
 }
@@ -1572,22 +1501,7 @@ $UninstallPrograms = @(
 
 
 
-$WhitelistedApps += @(
-    "WavesAudio.MaxxAudioProforDell2019"
-    "Dell - Extension*"
-    "Dell, Inc. - Firmware*"
-    "Dell Optimizer Core"
-    "Dell SupportAssist Remediation"
-    "Dell SupportAssist OS Recovery Plugin for Dell Update"
-    "Dell Pair"
-    "Dell Display Manager 2.0"
-    "Dell Display Manager 2.1"
-    "Dell Display Manager 2.2"
-    "Dell Peripheral Manager"
-)
-
-
-    $UninstallPrograms = $UninstallPrograms | Where-Object{$WhitelistedApps -notcontains $_}
+    $UninstallPrograms = $UninstallPrograms | Where-Object{$appstoignore -notcontains $_}
 
 
 foreach ($app in $UninstallPrograms) {
@@ -1615,7 +1529,7 @@ foreach ($app in $UninstallPrograms) {
 ##Belt and braces, remove via CIM too
 foreach ($program in $UninstallPrograms) {
     write-host "Removing $program"
-    Get-CimInstance -Classname Win32_Product | Where-Object Name -Match $program | Invoke-CimMethod -MethodName UnInstall
+    Get-CimInstance -Query "SELECT * FROM Win32_Product WHERE name = '$program'" | Invoke-CimMethod -MethodName Uninstall
     }
 
 ##Manual Removals
@@ -1765,13 +1679,11 @@ if ($manufacturer -like "Lenovo") {
         "E046963F.cameraSettings"
         "4505Fortemedia.FMAPOControl2_2.1.37.0_x64__4pejv7q2gmsnr"
         "ElevocTechnologyCo.Ltd.SmartMicrophoneSettings_1.1.49.0_x64__ttaqwwhyt5s6t"
+        "Lenovo User Guide"
     )
 
-        ##If custom whitelist specified, remove from array
-        if ($customwhitelist) {
-            $customWhitelistApps = $customwhitelist -split ","
-            $UninstallPrograms = $UninstallPrograms | Where-Object { $customWhitelistApps -notcontains $_ }
-        }
+
+            $UninstallPrograms = $UninstallPrograms | Where-Object { $appstoignore -notcontains $_ }
     
     
         
@@ -1895,6 +1807,44 @@ if (Test-Path $lenovonow) {
 
     Write-Host "All applications and associated Lenovo components have been uninstalled." -ForegroundColor Green
 }
+
+
+$filename = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\User Guide.lnk"
+
+if (Test-Path $filename) {
+    Remove-Item -Path $filename -Force
+}
+
+##Camera fix
+$keypath = "HKLM:\SOFTWARE\\Microsoft\Windows Media Foundation\Platform"
+$keyname = "EnableFrameServerMode"
+$value = 0
+if (!(Test-Path $keypath)) {
+    New-Item -Path $keypath -Force
+}
+Set-ItemProperty -Path $keypath -Name $keyname -Value $value -Type DWord -Force
+
+$keypath2 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Media Foundation\Platform key"
+if (!(Test-Path $keypath2)) {
+    New-Item -Path $keypath2 -Force
+}
+Set-ItemProperty -Path $keypath2 -Name $keyname -Value $value -Type DWord -Force
+}
+
+
+##Remove bookmarks
+
+##Enumerate all users
+$users = Get-ChildItem -Path "C:\Users" -Directory
+foreach ($user in $users) {
+    $userpath = $user.FullName
+    $bookmarks = "C:\Users\$userpath\AppData\Local\Microsoft\Edge\User Data\Default\Bookmarks"
+    ##Remove any files if they exist
+    foreach ($bookmark in $bookmarks) {
+        if (Test-Path -Path $bookmark) {
+            Remove-Item -Path $bookmark -Force
+        }
+    }
 }
 
 
@@ -1930,7 +1880,7 @@ if ($mcafeeinstalled -eq "true") {
 ### Download McAfee Consumer Product Removal Tool ###
 write-host "Downloading McAfee Removal Tool"
 # Download Source
-$URL = 'https://github.com/ServicedeskPoint2IT/WinDeBloat/blob/main/De-Bloat/mcafeeclean.zip'
+$URL = 'https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/mcafeeclean.zip'
 
 # Set Save Directory
 $destination = 'C:\ProgramData\Debloat\mcafee.zip'
@@ -1949,7 +1899,7 @@ write-host "McAfee Removal Tool has been run"
 ### Download McAfee Consumer Product Removal Tool ###
 write-host "Downloading McAfee Removal Tool"
 # Download Source
-$URL = 'https://github.com/ServicedeskPoint2IT/WinDeBloat/blob/main/De-Bloat/mccleanup.zip'
+$URL = 'https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/mccleanup.zip'
 
 # Set Save Directory
 $destination = 'C:\ProgramData\Debloat\mcafeenew.zip'
@@ -2034,9 +1984,9 @@ foreach ($user in $userprofiles) {
     }
 }
 
-if ($intunecomplete -lt 1 -and $nonAdminLoggedOn -eq $false) {
+if ($nonAdminLoggedOn -eq $false) {
 
-
+write-host "No logins detected, continue"
 ##Apps to remove - NOTE: Chrome has an unusual uninstall so sort on it's own
 $blacklistapps = @(
 
@@ -2098,6 +2048,11 @@ Start-Sleep -Seconds 5
 }
 
 }
+else {
+    write-host "Intune detected, skipping removal of apps"
+    write-host "$intunecomplete number of apps detected"
+
+}
 
 write-host "Completed"
 
@@ -2106,8 +2061,8 @@ Stop-Transcript
 # SIG # Begin signature block
 # MIIoGQYJKoZIhvcNAQcCoIIoCjCCKAYCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCBgaJtz+Sw+DIW7
-# Xp/5Mosd/4KFLfVzNjEPZZ940mYq/qCCIRwwggWNMIIEdaADAgECAhAOmxiO+dAt
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCBDKbfbLMTFPrFj
+# jccF9XMSRMyaptBsa2shdP0TqIy6GqCCIRwwggWNMIIEdaADAgECAhAOmxiO+dAt
 # 5+/bUOIIQBhaMA0GCSqGSIb3DQEBDAUAMGUxCzAJBgNVBAYTAlVTMRUwEwYDVQQK
 # EwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xJDAiBgNV
 # BAMTG0RpZ2lDZXJ0IEFzc3VyZWQgSUQgUm9vdCBDQTAeFw0yMjA4MDEwMDAwMDBa
@@ -2289,33 +2244,33 @@ Stop-Transcript
 # aWduaW5nIFJTQTQwOTYgU0hBMzg0IDIwMjEgQ0ExAhAIsZ/Ns9rzsDFVWAgBLwDp
 # MA0GCWCGSAFlAwQCAQUAoIGEMBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJ
 # KoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQB
-# gjcCARUwLwYJKoZIhvcNAQkEMSIEIGRUFBBJKigDfFuOe6PJJZccDK5roJVO6VAX
-# tufodENrMA0GCSqGSIb3DQEBAQUABIICALYdFS7F2xGVSStSLDGzRABBpXs7qiF7
-# UMM50yPwXWVsszZBB5g0AmN7TI5WMxPEv+JHxEVhb/okECsKSqo6T38+w5zQtNLD
-# zetW7NYuCfZfJ9ORB8jUeC9CgpFMfJk0re0OHBvAgNYx3ijTy/zq1iaaAujssKJa
-# blDd3QDfWYPVsKEecIZTa4a0h3C4HjwS+Rq5jiVq0RdOvUU3QtDzcfb+HzFy/cAk
-# jQbh+LKQNkUn/MZFH8XsdQ5WvHOqTJoruzZqFGhcf6ULERWAAcpVo4fnMxsWu2JS
-# 3j1Cg9GgndnFuVkW32smnKhrY1hWQ5x+pi3YPcxDDQB4Fd4otUVBgfSDXtHBG6M0
-# UH9vtINhFQKm+x14UAEZblWAVt9KgQOwS4gXfryLILvEBDGjg+WTi6Yj+RrLyNaL
-# we2iMGSD5zpcAqBfvM0oUzyi0WOjuvSbtawVZYz+tH1mOoI8ACAUx2TodgH0XjH3
-# I5gcsY1tUIeQ1iWO+V13/WC0aCYIVfCkrABZOt0FLZHyZDLSnmw+XL0lcn2AbREw
-# DXemD8juLP1nnm7PcvQmfZwZQKlBxfcxFcQ1f/d5/ReSobouX4SZItdviS9zQ3WQ
-# kKv8j3f1GrQQLp6VcIElAEPm1ukQYMmE/q3/td/q9IQzqOB++EjpeRTtBwrBxVg+
-# 8z2ZrBj0sEuIoYIDIDCCAxwGCSqGSIb3DQEJBjGCAw0wggMJAgEBMHcwYzELMAkG
+# gjcCARUwLwYJKoZIhvcNAQkEMSIEIAtxFU2z9dPWdYyEL0ijdatCLQSDOfgRK6Y1
+# EFIcPoOgMA0GCSqGSIb3DQEBAQUABIICAIFT7M10ZbNkeOISkE6TMrxanR2flCKr
+# 21wc8dmAtcYU3FGkwXDMDku6czNhXmTM+kouxJ936OVU4oXnHmkFrpdwWEQVuNsB
+# zqUTVNt5bUhlUGo0rJBbnDQlqiz20M7fV7nNBBCVLejsTeWmhPPvSjmo6a/jKFxk
+# YN9iLfe5Ym+4YARmkU6ckBCk5yQ5NIbZP3hPu3CIASdWxSAxUpO94oOi5YegTWpR
+# wn893n1IYV3mh5Igze9HmPa1Hki+5an6xPjbvWvUIak88IydSjGeCwh+cGBNwMK1
+# QbZtPKPbYbPoI24XAO8EDG74gIvfZpVnoax5lh/8wwnuEOqu2Q44Wp60jd8aVbi+
+# aeAPQSFUmcu0yMxfHZp/4jl/BLU0aa/G0xp/WVhulK44BlEjbkb3ao/K/xlKNWvu
+# d9GfJD/XH2TqJct8npjG3PM6RdlRe3pZzZnPmyQ656c1JI0FLISiXfF1M4TGKd+h
+# DheDkVtxINe/eGorO73rj1XWY8mTADpPRhdAKSh31gNz+lGLaiQTQ+VbCpUDYXih
+# B2zOWGLon+9pJFZhodM/m4YCq5oHK+U6IroE5X/5bdrrag4ERTdXNz1Le5PFvhtj
+# 35vZHkFpr/uJnxo4U7t09cr125HFWU/ZXgALUVpy80EFIl5UlWSBMIAvOU9oK53d
+# CTqDAn0F1Ru4oYIDIDCCAxwGCSqGSIb3DQEJBjGCAw0wggMJAgEBMHcwYzELMAkG
 # A1UEBhMCVVMxFzAVBgNVBAoTDkRpZ2lDZXJ0LCBJbmMuMTswOQYDVQQDEzJEaWdp
 # Q2VydCBUcnVzdGVkIEc0IFJTQTQwOTYgU0hBMjU2IFRpbWVTdGFtcGluZyBDQQIQ
 # BUSv85SdCDmmv9s/X+VhFjANBglghkgBZQMEAgEFAKBpMBgGCSqGSIb3DQEJAzEL
-# BgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTI0MDYyNDE4NTI1NVowLwYJKoZI
-# hvcNAQkEMSIEIKspNJfVnNbFDoP+Y56B9ZalVnsSBZUFNVcOuFEfTOVyMA0GCSqG
-# SIb3DQEBAQUABIICAGwRFcUPth3JZOjjcu1rkmVugqsyMUEmSeXlfNae2URce5S2
-# TjkKnTlA4uEHqi1LJgxTNCEiO3MZHuV3b4C3LXrnBjoyussvGaOJ3lY8WEtWit+V
-# yhSq3cRG7MACnCYD4K5itowK1kkyRNI7JsLZRWleFrCqrre7uXoLFgu6dWYgNKHE
-# OP8VaLTcB1qrcvegHKv8zWZfp79NdzW1VuUHI73m88Rnjo5fLkKgH+cOF9dSlXoQ
-# /YXmOJe4y5C6OG+sTOcJK9G0GkrVoBJlVA6l0vdXQRcZgfRsSENJiFQIRMWTGyVP
-# nWsx+u6Mthxujcpu1SoN8VU3D/mMRIhUHJtC8CP/rwPQUvO/U4te2LIUEvBBgri5
-# RxKT5Qt8giZ6170QnyB5Xsc5FwZmj/NPVN9rD0r+aijRB20y77jTZJRbOAcVo/iE
-# hjX2h/xxSYc9KeqwEZ8g/A0l4bDGOWNzfdzqInfLG+FHatBoyPm4KmzOTOmII1/B
-# pA7PS1i/u8ql3hJWdqp/tK497rXC97NR1wteajTWWOjL9q5tftIrYmNdYc7t+Zh9
-# 2r4f1socnsVpi6+iwVLAOkPGKOVKKPbhw23jOApHXz5lOFjxqWOSKZlC7aGVB8TC
-# 6une5QzlDOBFpo7XFAaCkFBaME8Auof6n5qs9sNE+eRdsGrS2b2mjDRaPI7h
+# BgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTI0MDcyOTA4NTAyNFowLwYJKoZI
+# hvcNAQkEMSIEIBe54LwLUMHOO0mORWdvp5MuqMjkpHrOX9wh+2a2OS+dMA0GCSqG
+# SIb3DQEBAQUABIICAH5hhN065cKWWaX/yZ6dpFcHXMQ1lAFgsw97a4ilbph2g+ZL
+# CvowJbYw6rqIaeOTRAaE5TSuecMJZQiDa4nVennahko5UYdELBWG7DyazGzJ6G6r
+# M02gTOTcpN1SXVny5iiBP2qHN8S9KxImhoaKN8CSjBrtxaYXTK8l1jM5noV59UxB
+# eL4CJWECs/rIkD/1WUELB8RpSVDpcP5z2EJJF0hm85YJkJkuYL3fxaWNYSX/hrxS
+# wnKBSiueoKfVsVLhSRtXYxboo1qgQabHjYcbCP3Vu+DdR9sXD/WqL2QLpsif18Ry
+# RSwZlHQM7tq2QJwJAV09MnZV7cnFdAL6GkWL4ltULq1LaXnHwpEb26nT2YiY2q87
+# C2eJxAQna3E98ng8T5+z3AYG48m+dN0HcAdYTWUja6ZgIHYs0x1UKt52JxFQxKhw
+# UeooiPej6etOvghk8ye8bjfdHg4DtDufXUt46OfBVhEipEL2vSEpkKe47+cjuoUR
+# JZhtuyNoQNPW8xQgHQi+mZMS4/dZvLNK1NXvaC5bjE0Tu7wFChC6PraQWSwtbPWB
+# h/kaW3Ux752kC/2lzGWOeMgyWgYPb5Az0itCf86v9Qk/Q6B9XHLE954+NpVE8iaW
+# kmeD0cVQmEnsMZIxHaZxEen6S914YqzcQ1Jo5UIY+CvFZpqazrnQnxZBBewH
 # SIG # End signature block
