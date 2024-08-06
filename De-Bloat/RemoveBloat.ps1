@@ -856,7 +856,7 @@ If ($null -ne $ProvisionedPackage)
 }
 
 ##Tweak reg permissions
-invoke-webrequest -uri "https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/SetACL.exe" -outfile "C:\Windows\Temp\SetACL.exe"
+invoke-webrequest -uri "https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/SetACL.exe" -outfile "C:\Windows\Temp\SetACL.exe"
 C:\Windows\Temp\SetACL.exe -on "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications" -ot reg -actn setowner -ownr "n:$everyone"
  C:\Windows\Temp\SetACL.exe -on "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications" -ot reg -actn ace -ace "n:$everyone;p:full"
 
@@ -1107,7 +1107,7 @@ foreach ($user in $userprofiles) {
 
 if ($nonAdminLoggedOn -eq $false) {
 MkDir -Path "C:\Users\Default\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState" -Force -ErrorAction SilentlyContinue | Out-Null
-$starturl = "https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/start2.bin"
+$starturl = "https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/start2.bin"
 invoke-webrequest -uri $starturl -outfile "C:\Users\Default\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState\Start2.bin"
 }
 }
@@ -1880,7 +1880,7 @@ if ($mcafeeinstalled -eq "true") {
 ### Download McAfee Consumer Product Removal Tool ###
 write-host "Downloading McAfee Removal Tool"
 # Download Source
-$URL = 'https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/mcafeeclean.zip'
+$URL = 'https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/mcafeeclean.zip'
 
 # Set Save Directory
 $destination = 'C:\ProgramData\Debloat\mcafee.zip'
@@ -1899,7 +1899,7 @@ write-host "McAfee Removal Tool has been run"
 ### Download McAfee Consumer Product Removal Tool ###
 write-host "Downloading McAfee Removal Tool"
 # Download Source
-$URL = 'https://github.com/andrew-s-taylor/public/raw/main/De-Bloat/mccleanup.zip'
+$URL = 'https://github.com/ServicedeskPoint2IT/WinDeBloat/raw/main/De-Bloat/mccleanup.zip'
 
 # Set Save Directory
 $destination = 'C:\ProgramData\Debloat\mcafeenew.zip'
